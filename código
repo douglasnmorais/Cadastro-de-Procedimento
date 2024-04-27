@@ -1,0 +1,166 @@
+from typing import Tuple
+import customtkinter as ctk
+from tkinter import *
+from tkinter import messagebox
+import openpyxl, xlrd   
+import pathlib
+from openpyxl import Workbook
+
+# Aparência padrão do sistema
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme('blue')
+
+class App(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.layout_config()
+        self.appearence()
+        self.todo_sistema()
+
+
+    def layout_config(self):
+        self.title("Cadastro de Procedimentos")
+        self.geometry('850x550')
+
+
+    def appearence(self):
+        self.lb_apm = ctk.CTkLabel(self, text='Tema', bg_color='transparent', text_color=['#000','#fff']).place(x=50, y=440)
+        self.opt_apm = ctk.CTkOptionMenu(self, values=['Light', 'Dark'], command=self.change_apm).place(x=50, y=470)
+
+
+    def todo_sistema(self):
+        frame = ctk.CTkFrame(self, width=850, height=50, corner_radius=0,bg_color='teal', fg_color='teal')
+        frame.place(x=0, y=10)
+        title = ctk.CTkLabel(frame, text = 'Sistema de Cadastro de Procedimentos', font=('Century Gothic bold', 24), text_color='#fff').place(x=190, y=10)
+        span = ctk.CTkLabel(self, text = 'Preencha os campos do formulário!', font=('Century Gothic bold', 16), text_color=['#000','#fff']).place(x=50, y=70)
+
+
+        ficheiro = pathlib.Path('Procedimentos.xlsx')
+        if ficheiro.exists():
+            pass
+        else:
+            ficheiro=Workbook()
+            folha=ficheiro.active
+            folha['A1']='Data'
+            folha['B1']='Nome do Paciente'
+            folha['C1']='Procedimento'
+            folha['D1']='Valor'
+            folha['E1']='Pagamento'
+            folha['F1']='Número de Autorização'
+            folha['G1']='Observação'
+
+            ficheiro.save('Procedimentos.xlsx')
+
+
+        def submit():
+
+            data = data_value.get()
+            name = name_value.get()
+            procedimento = procedimento_value.get()
+            valor = valor_value.get()
+            pagamento = pagamento_value.get()
+            autorizacao = autorizacao_value.get()
+            observacao = obs_entry.get(0.0, END)
+
+            if(name=='' or data=='' or procedimento =='' or valor==''):
+                messagebox.showerror('Sistema', 'Erro\n Preencha os campos necessários!')
+            else:
+
+                ficheiro = openpyxl.load_workbook('Procedimentos.xlsx')
+                folha = ficheiro.active
+                folha.cell(column=1, row=folha.max_row+1, value=data)
+                folha.cell(column=2, row=folha.max_row, value=name)
+                folha.cell(column=3, row=folha.max_row, value=procedimento)
+                folha.cell(column=4, row=folha.max_row, value=valor)
+                folha.cell(column=5, row=folha.max_row, value=pagamento)
+                folha.cell(column=6, row=folha.max_row, value=autorizacao)
+                folha.cell(column=7, row=folha.max_row, value=observacao)
+
+                ficheiro.save(r'Procedimentos.xlsx')
+                messagebox.showinfo('Sistema', 'Dados salvos com sucesso')
+
+
+        def clear():
+            data_value.set('')
+            name_value.set('')
+            procedimento_value.set('')
+            valor_value.set('')
+            autorizacao_value.set('')
+            obs_entry.delete(0.0, END)
+
+
+        #variaveis de texto
+        data_value = StringVar()
+        name_value = StringVar()
+        procedimento_value = StringVar()
+        valor_value = StringVar()
+        pagamento_value = StringVar()
+        autorizacao_value = StringVar()
+
+        #ENTRADAS
+        data_entry = ctk.CTkEntry(self, width=100, textvariable=data_value, font=('Century Gothic bold',16), fg_color='transparent')
+        name_entry = ctk.CTkEntry(self, width=200, textvariable=name_value, font=('Century Gothic bold',16), fg_color='transparent') 
+        procedimento_entry = ctk.CTkEntry(self, width=300, textvariable=procedimento_value, font=('Century Gothic bold',16), fg_color='transparent')
+        valor_entry = ctk.CTkEntry(self, width=150, textvariable=valor_value, font=('Century Gothic bold',16), fg_color='transparent')
+        pagamento_entry = ctk.CTkEntry(self, width=100, textvariable=pagamento_value, font=('Century Gothic bold',16), fg_color='transparent')
+        autorizacao_entry = ctk.CTkEntry(self, width=200, textvariable=autorizacao_value, font=('Century Gothic bold',16), fg_color='transparent')
+
+        #combobox
+        gender_combobox = ctk.CTkComboBox(self, values=['Crédito', 'Débito', 'Pix'], font=('Century Gothic bold', 14))
+        gender_combobox.set('Crédito')
+
+        #Caixa de texto
+        obs_entry = ctk.CTkTextbox(self, width=400, height=150, font=('arial',18), border_color='#aaa', border_width=2, fg_color='transparent')
+
+        #labels
+        lb_data = ctk.CTkLabel(self, text = 'Data', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_name = ctk.CTkLabel(self, text = 'Nome do Paciente', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_procedimento = ctk.CTkLabel(self, text = 'Procedimento', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_valor = ctk.CTkLabel(self, text = 'Valor do Procedimento', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_pagamento = ctk.CTkLabel(self, text = 'Forma de Pagamento', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_autorizacao = ctk.CTkLabel(self, text = 'Número de autorização', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+        lb_observacao = ctk.CTkLabel(self, text = 'Observações', font=('Century Gothic bold', 16), text_color=['#000','#fff'])
+
+
+        btn_submit = ctk.CTkButton(self, text='Salvar'.upper(), command=submit , fg_color='#151', hover_color='#131').place(x=400, y=470)
+        btn_limpar = ctk.CTkButton(self, text='Limpar'.upper(), command=clear , fg_color='#151', hover_color='#131').place(x=600, y=470)
+
+
+        #posicionar elementos
+        
+        #data
+        lb_data.place(x=50, y=120)
+        data_entry.place(x=50, y=150)
+
+        #nome
+        lb_name.place(x=160, y=120)
+        name_entry.place(x=160, y=150)
+
+        #Procedimento
+        lb_procedimento.place(x=50, y=200)
+        procedimento_entry.place(x=50, y=230)
+
+        # Valor
+        lb_valor.place(x=400, y=120)
+        valor_entry.place(x=400, y=150)
+
+        #pagamento
+        lb_pagamento.place(x=400, y=200)
+        pagamento_entry.place(x=400, y=230)
+        gender_combobox.place(x=400, y=230)
+
+        #autorização
+        lb_autorizacao.place(x=50, y=280)
+        autorizacao_entry.place(x=50, y=310)
+
+        #observação
+        lb_observacao.place(x=400, y=280)
+        obs_entry.place(x=400, y=310)
+
+
+    def change_apm(self, new_apaerence_mode):
+        ctk.set_appearance_mode(new_apaerence_mode)
+
+if __name__=='__main__':
+    app = App()
+    app.mainloop()
